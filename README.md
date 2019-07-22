@@ -38,7 +38,7 @@ var3=$(expr $var2 / $var1)
 echo The result is $var3
 ```
 expr支持的运算符
-![expr支持的运算符](images/expr_operations.png)
+![expr支持的运算符](md_images/expr_operations.png?raw=true)
 
 ### 使用方括号`$[运算式]`
 ```shell
@@ -213,4 +213,20 @@ $ rpm -qa | sort | more
 可以搭配重定向
 ```shell
 $ rpm -qa | sort > rpm.list
+```
+
+
+## 退出脚本
+* Linux使用`$?`查看上一条命令的退出状态码。
+* 一个成功的命令的退出状态码是0。
+* 退出状态码是0或正整数
+
+在脚本中使用
+```shell
+#!/bin/bash
+# testing the exit status
+var1=10
+var2=30
+var3=$[$var1 + $var2]
+exit $var3
 ```
