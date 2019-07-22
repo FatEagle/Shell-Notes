@@ -1,5 +1,52 @@
 # shell 脚本笔记
 
+## 快速入门
+
+### Control Flow
+#### if
+```shell
+if command
+then
+    commands
+fi
+```
+如果if后的command的退出状态码是0（执行成功)，那么then后的命令会被执行
+
+等价形式，只是利用`;`把then放在了同一行
+```shell
+if command; then
+    commands
+fi
+```
+
+```shell
+if command
+then
+    commands
+else
+    commands
+fi
+```
+
+```shell
+if command1
+then
+    commands
+elif command2
+then
+    commands
+fi
+```
+
+
+#### case
+```shell
+case variable in
+pattern1 | pattern2) commands1;;
+pattern3) commands2;;
+esac
+```
+
 
 ## 必须要加入 `#!/bin/bash`
 shell脚本会读取第一行， 来获取使用哪个shell运行脚本。
@@ -219,7 +266,7 @@ $ rpm -qa | sort > rpm.list
 ## 退出脚本
 * Linux使用`$?`查看上一条命令的退出状态码。
 * 一个成功的命令的退出状态码是0。
-* 退出状态码是0或正整数
+* 退出状态码是0或正整数, 范围在0-255
 
 在脚本中使用
 ```shell
@@ -230,3 +277,236 @@ var2=30
 var3=$[$var1 + $var2]
 exit $var3
 ```
+
+
+## Control Flow
+
+### if
+```shell
+if command
+then
+    commands
+fi
+```
+如果if后的command的退出状态码是0（执行成功)，那么then后的命令会被执行
+
+等价形式，只是利用`;`把then放在了同一行
+```shell
+if command; then
+    commands
+fi
+```
+
+```shell
+if command
+then
+    commands
+else
+    commands
+fi
+```
+
+```shell
+if command1
+then
+    commands
+elif command2
+then
+    commands
+fi
+```
+
+示例：
+```shell
+#!/bin/bash
+# Testing nested ifs - use elif & else #
+testuser=NoSuchUser
+
+if grep $testuser /etc/passwd
+then
+   echo "The user $testuser exists on this system."
+elif ls -d /home/$testuser
+then
+   echo "The user $testuser does not exist on this system."
+   echo "However, $testuser has a directory."
+else
+   echo "The user $testuser does not exist on this system."
+   echo "And, $testuser does not have a directory."
+fi
+```
+
+### test
+#### 方括号形式表示
+**注意，第一个方括号之后和第二个方括号之前必须加上一个空格，否则就会报错。**
+```shell
+if [ condition ]
+then
+    commands
+fi
+```
+#### 直接使用命令
+格式
+```shell
+test condition
+```
+
+只写`test` 退出状态码 0
+```shell
+#!/bin/bash
+# Testing the test command #
+my_variable="Full"
+
+if test $my_variable
+then
+   echo "The $my_variable expression returns a True"
+else
+   echo "The $my_variable expression returns a False"
+fi
+$
+$ ./test6.sh
+The Full expression returns a True 
+```
+
+#### test支持的比较形式
+test 支持3类判断
+* 数值比较
+* 字符串比较
+* 文件比较
+
+**1.数值比较**
+![test_value_compare](md_images/test_value_compare.png?raw=true)
+
+
+**注意**，bash shell只能处理整数，涉及到浮点数的条件会出错
+```shell
+[Charles Shell]$ test 1 -eq 2[Charles Shell]$ $?
+bash: 1: command not found
+[Charles Shell]$ test 1 -eq 1
+[Charles Shell]$ $?
+bash: 0: command not found
+```
+
+```shell
+#!/bin/bash
+# if_statement.sh
+value=10
+
+if [ $value -gt 5 ]
+then
+    echo "Value great than 5!"
+fi
+
+benchmark=20
+if [ $value -gt $benchmark ]
+then
+    echo "Value great than benchmarl"
+else
+    echo "Value less than or equal benchmark"
+fi
+
+# result:
+# Value great than 5!
+# Value less than or equal benchmark
+```
+
+**2. 字符串比较**
+![test_string_compare](md_images/test_string_compare.png?raw=true)
+
+字符串比较时，大小写和标点都会考虑。
+**注意：**
+* 要考虑">"和"<"号的转义，写成"\>"
+* 不同的命令在处理大写字母和小写字母上的顺序不同，有时是大写字符大于小写字符，有时相反。
+
+**3. 文件比较**
+用于检测文件状态
+![test_file_compare](md_images/test_file_compare.png?raw=true)
+
+### 复合条件
+* [ condition1 ] && [ condition2 ]
+* [ condition1 ] || [ condition2 ]
+
+```shell
+#!/bin/bash
+# testing compound comparisons
+
+if [ -d $HOME ] && [ -w $HOME/testing ] then
+   echo "The file exists and you can write to it"
+else
+   echo "I cannot write to the file"
+fi
+```
+
+### 用于数学表达式的双括号
+```shell
+(( expression ))
+```
+除了标准数学运算符 + - * \ ,还支持如下的表
+![symbol](md_images/symbol.png?raw=true)
+
+```shell
+#!/bin/bash
+# symbol.sh
+
+value=10
+if (( $value * 2 > 15 ))
+then
+    echo "value * 2 > 15"
+fi
+
+# value=10
+# if (( ${value} / 2 > 5))
+# then
+#     echo "value / 2 > 5"
+# fi
+
+val1=10
+#
+if (( $val1 ** 2 > 90 ))
+then
+    (( val2 = $val1 ** 2 ))
+    echo "The square of $val1 is $val2"
+fi
+
+# result
+# value * 2 > 15
+# The square of 10 is 100
+```
+
+### 使用双方括号利用模式匹配处理字符串
+`[[ expression ]]`，双方括号中可以使用模式匹配来处理字符串
+```shell
+#!/bin/bash
+# using pattern matching 
+if [[ $USER == r* ]]
+then
+echo "Hello $USER"
+else 5
+    echo "Sorry, I do not know you"
+fi
+```
+
+### case
+```shell
+case variable in
+pattern1 | pattern2) commands1;;
+pattern3) commands;;
+esac
+```
+
+```shell
+#!/bin/bash
+# using the case command #
+case $USER in
+rich | barbara)
+    echo "Welcome, $USER"
+    echo "Please enjoy your visit";;
+testing)
+    echo "Special testing account";;
+jessica)
+    echo "Do not forget to log off when you're done";;
+*)
+    echo "Sorry, you are not allowed here";;
+esac
+```
+
+### for
