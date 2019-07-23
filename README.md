@@ -1,6 +1,6 @@
 # shell 脚本笔记
 
-## 快速入门
+## 快速查询
 
 ### Control Flow
 #### if
