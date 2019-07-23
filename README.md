@@ -38,13 +38,99 @@ then
 fi
 ```
 
-
 #### case
 ```shell
 case variable in
 pattern1 | pattern2) commands1;;
 pattern3) commands2;;
 esac
+```
+
+#### for
+```shell
+for var in list:
+do
+    commands
+done
+```
+
+类C语言风格的for
+```shell
+for (( variable assignment ; condition ; iteration process ))
+do
+    commands
+done
+
+# example
+for (( i=1; i <= 10; i++ ))
+do
+    echo $i
+done
+
+for (( a=1, b=10; a <=10; a++, b-- ))
+do  
+    echo "$b - $a"
+done
+```
+
+#### while
+```shell
+while test command
+do
+    commands
+done
+```
+
+```shell
+#!/bin/bash
+# while_statement.sh
+
+i=5
+while [ $i -gt 0 ]
+do
+    echo $i
+    i=$[ $i - 1 ]
+done
+```
+
+#### until
+只有test命名退出状态码不是0时执行
+```shell
+until test commands
+do
+    other commands
+done
+```
+
+#### 循环控制 break 和 continue
+```shell
+break [n]
+continue [n]
+```
+n指定跳出的层数，不写n时默认为1，当层。
+
+### 处理用户输入
+* $0 程序名
+* $1 第一个参数
+* $n 第n个参
+* $# 输入参数的数量
+
+```shell
+total=$[ $1 + $2 ]
+echo "First parameter is $1."
+echo "Second parameter is $2."
+echo "Total equals $total."
+```
+
+使用`${!n}`动态获取第n个参数的值
+```shell
+total=0
+for (( i=1; i <= $#; i++ ))
+do 
+    echo "$i parameter is ${!i}"
+    total=$[ $total + ${!i} ]
+done
+echo "Total equals $total."
 ```
 
 
@@ -510,3 +596,228 @@ esac
 ```
 
 ### for
+```shell
+for var in list:
+do
+    commands
+done
+```
+
+```shell
+#!/bin/bash
+# for_statement.sh
+
+for name in aa bb cc dd
+do
+    echo $name
+done
+
+echo '\nsecond case'
+
+for word in "I don't know if this'll work"
+do 
+    echo $word
+done
+
+echo '\nthird case:'
+for word in I don\'t know if "this'll" work
+do
+    echo $word
+done
+
+echo "\nuse a list variable in for statement"
+
+list="aa bb cc"
+list=${list}" dd"
+for word in $list
+do
+    echo $word
+done
+
+echo "\nuse a list from command"
+for file_name in $(ls)
+do
+    echo $file_name
+done
+
+echo "\n define yourself IFS"
+# define yourself IFS(internal field separator)
+# the default value is space, tab and enter.
+IFS_OLD=$IFS
+IFS=$'\n'
+for file_info in $(ls -l)
+do
+    echo $file_info
+done
+# define more than one values to IFS
+# IFS=$:;
+IFS=$IFS_OLD
+
+echo "read files in another method"
+for file_path in ./md_images/*
+do 
+    echo $file_path
+done
+
+echo 
+
+path=$(pwd)
+for file_path in $path/*
+do
+    echo $file_path
+done
+
+echo 
+
+for file_name in $(ls $path)
+do
+    echo $file_name
+done
+```
+
+C语言风格的forxunhuan
+```shell
+for (( variable assignment ; condition ; iteration process ))
+do
+    commands
+done
+```
+
+```shell
+for (( i=1; i <= 10; i++ ))
+do
+    echo $i
+done
+```
+
+### while
+```shell
+while test command
+do
+    commands
+done
+```
+
+```shell
+#!/bin/bash
+# while_statement.sh
+
+i=5
+while [ $i -gt 0 ]
+do
+    echo $i
+    i=$[ $i - 1 ]
+done
+```
+
+### until
+只有test命名退出状态码不是0时执行
+```shell
+until test commands
+do
+    other commands
+done
+```
+
+```shell
+#!/bin/bash
+# until_statement.sh
+
+var=10
+
+until [ $var -eq 0 ]
+do 
+    echo $var
+    var=$[ $var - 1 ]
+done
+```
+### 循环控制 break 和 continue
+```shell
+for var1 in 1 2 3 4 5 6 7 8 9 10
+do
+    if [ $var1 -eq 5 ]
+    then
+        break
+    fi
+    echo "Iteration number: $var1"
+done
+echo "The for loop is completed"
+``` 
+
+break可以指定跳出循环的层数
+```shell
+for (( a = 1; a < 4; a++ ))
+do
+    echo "Outer loop: $a"
+    for (( b = 1; b < 100; b++ ))
+    do
+        if [ $b -gt 4 ]
+        then
+            break 2 
+        fi
+        echo "    Inner loop: $b"
+    done
+done
+```
+
+### 将循环的输出送到一个文件中
+```shell
+for file in /home/rich/*
+     do
+       if [ -d "$file" ]
+       then
+          echo "$file is a directory"
+       elif
+          echo "$file is a file"
+       fi
+done > output.txt
+```
+
+## 处理用户输入
+* $0 程序名
+* $1 第一个参数
+* $n 第n个参
+* $# 输入参数的数量
+
+```shell
+#!/bin/bash
+# add.sh
+
+if [ ! -n "$1" ]
+then
+    echo "You should input the first parameter."
+    exit 2
+fi
+
+if [ ! -n "$2" ]
+then    
+    echo "You shoule input the second parameter."
+    exit 2
+fi
+
+total=$[ $1 + $2 ]
+echo "First parameter is $1."
+echo "Second parameter is $2."
+echo "Total equals $total."
+
+```
+
+使用`${!n}`动态获取第n个参数的值
+```shell
+#!/bin/bash
+# add_v2.sh
+
+if [ ! -n "$1" ]
+then
+    echo "You should input the first parameter."
+    exit 2
+fi
+
+total=0
+for (( i=1; i <= $#; i++ ))
+do 
+    echo "$i parameter is ${!i}"
+    total=$[ $total + ${!i} ]
+done
+echo "Total equals $total."
+```
