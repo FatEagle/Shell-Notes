@@ -2,6 +2,19 @@
 
 ## 快速查询
 
+### 数组
+```shell
+#!/bin/bash
+
+array=(1 2 3 4 5)
+for value in ${array[*]}
+do
+    echo $value
+done
+
+echo "The second number is ${array[1]}"
+```
+
 ### Control Flow
 #### if
 ```shell
@@ -114,6 +127,8 @@ n指定跳出的层数，不写n时默认为1，当层。
 * $1 第一个参数
 * $n 第n个参
 * $# 输入参数的数量
+* $@ 命令行的所有参数, 遍历时是作为一个列表
+* $* 命令行的所有参数, 遍历时是一个字符串
 
 ```shell
 total=$[ $1 + $2 ]
@@ -129,6 +144,16 @@ for (( i=1; i <= $#; i++ ))
 do 
     echo "$i parameter is ${!i}"
     total=$[ $total + ${!i} ]
+done
+echo "Total equals $total."
+```
+
+```shell
+total=0
+for number in $@
+do 
+    echo "parameter is $number"
+    total=$[ $total + $number ]
 done
 echo "Total equals $total."
 ```
@@ -778,6 +803,8 @@ done > output.txt
 * $1 第一个参数
 * $n 第n个参
 * $# 输入参数的数量
+* $@ 命令行的所有参数, 遍历时是作为一个列表
+* $* 命令行的所有参数, 遍历时是一个字符串
 
 ```shell
 #!/bin/bash
@@ -821,3 +848,173 @@ do
 done
 echo "Total equals $total."
 ```
+
+```shell
+#!/bin/bash
+# add_v3.sh
+
+if [ ! -n "$1" ]
+then
+    echo "You should input the first parameter."
+    exit 2
+fi
+
+total=0
+for number in $@
+do 
+    echo "parameter is $number"
+    total=$[ $total + $number ]
+done
+echo "Total equals $total."
+```
+
+## 获取用户输入（动态交互）
+```shell
+read variable
+```
+
+```shell
+echo -n "Enter your name: "
+read name
+echo $name
+```
+
+```shell
+read -p "Please enter your age: " age
+```
+
+## 读取文件
+```shell
+#!/bin/bash
+# reading data from a file #
+count=1
+cat test | while read line do
+   echo "Line $count: $line"
+   count=$[ $count + 1]
+done
+echo "Finished processing the file"
+```
+
+## 函数
+shell将所有的函数都作为一个命令
+```
+function name {
+    commands
+}
+```
+
+向函数中传递参数
+```shell
+function add {
+    if [ ! -n "$1" ]
+    then
+        echo "You should input the first parameter."
+        exit 2
+    fi
+
+    total=0
+    for number in $@
+    do 
+        total=$[ $total + $number ]
+    done
+    echo $total
+}
+
+read -p 'The list of numbers: ' numbers
+echo "the sum of numbers is $(add $numbers)"
+```
+
+使用`return`返回退出状态码
+使用$() 或 "``"来接受函数的结果
+```shell
+#/bin/bash
+
+function times2 {
+    read -p "Enter a value: " value
+    echo $[ $value * 2 ]
+}
+
+result=$(times2)
+echo "New value is $result."
+```
+
+函数内部的变量默认是全局变量
+如果想使用局部变量需要在声明时加上`local`关键字
+```shell
+function times2 {
+    local value
+    read -p "Enter a value: " value
+    echo $[ $value * 2 ]
+}
+```
+也可以在声明的同时赋值
+```shell
+function times2 {
+    local value=5
+    echo "====local in times2 $value===="
+    read -p "Enter a value: " value
+    echo $[ $value * 2 ]
+}
+```
+
+递归
+```shell
+#!/bin/bash
+# 计算阶乘，展示递归的用法
+
+function factorial {
+    if [ $1 -eq 1 ]
+    then
+        echo 1
+    else 
+        local temp=$[ $1 - 1 ]
+        local result=$(factorial $temp)
+        echo $[ $result * $1 ]
+    fi 
+}
+
+read -p "Enter value: " value
+result=$(factorial $value)
+echo "The factorial of $value is: $result"
+```
+
+调用函数库
+```shell
+# 函数库文件
+function factorial {
+    if [ $1 -eq 1 ]
+    then
+        echo 1
+    else 
+        local temp=$[ $1 - 1 ]
+        local result=$(factorial $temp)
+        echo $[ $result * $1 ]
+    fi 
+}
+```
+
+```shell
+#!/bin/bash
+# 使用函数库的文件
+
+# 使用source导入函数库
+source ./fac_func.sh
+echo $(factorial 5)
+```
+
+## 数组
+```shell
+#!/bin/bash
+
+array=(1 2 3 4 5)
+for value in ${array[*]}
+do
+    echo $value
+done
+
+echo "The second number is ${array[1]}"
+```
+
+## 其他
+1. source命令，source会再当前shell的上下文中执行命令，而不是创建一个新的shell。其有一个快捷的别名`.`，如`. ./myscript.sh`
+2. 
